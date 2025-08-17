@@ -23,14 +23,14 @@ def _generate_headers(signature: str, merchant_id: str) -> dict[str, Any]:
     return {"merchant": merchant_id, "sign": signature, "Content-Type": "application/json"}
 
 
-async def _create_invoice(order_id: str) -> dict[str, Any]:
+async def _create_invoice() -> dict[str, Any]:
     """Creates invoice for heleket.com"""
     async with ClientSession() as session:
         payment_data = json.dumps(
             {
                 "amount": config.business.subscription_price,
                 "currency": "USDT",
-                "order_id": order_id,
+                "order_id": str(uuid4()),
             }
         )
         signature = _generate_signature(payment_data, config.heleket.api_key)
@@ -47,8 +47,7 @@ async def _create_invoice(order_id: str) -> dict[str, Any]:
 async def subscribe_command_handler(message: types.Message, **data: Unpack[TransferData]) -> None:
     """/subscribe command handler"""
     try:
-        order_id = str(uuid4())
-        invoice = await _create_invoice(order_id)
+        invoice = await _create_invoice()
 
         # Записываем данные о созданном платеже в базу данных
         invoice_id = invoice["result"]["order_id"]
