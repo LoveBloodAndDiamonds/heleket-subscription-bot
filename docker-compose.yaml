@@ -25,6 +25,8 @@ services:
       - .env
     volumes:
       - ./app:/app/app
+      - ./common:/app/common
+      - ./migrations:/app/migrations
       - ./logs:/app/logs
     depends_on:
       postgres:
@@ -42,6 +44,28 @@ services:
       --proxy-headers
       --forwarded-allow-ips=*
       "
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    restart: always
+
+  bot:
+    build:
+      context: .
+    env_file:
+      - .env
+    volumes:
+      - ./bot:/app/bot
+      - ./common:/app/common
+      - ./migrations:/app/migrations
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "uv run python3 -m bot"
     logging:
       driver: "json-file"
       options:

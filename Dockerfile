@@ -23,3 +23,6 @@ COPY alembic.ini /app/alembic.ini
 
 # Копируем приложение
 COPY app /app/app
+COPY bot /app/bot
+COPY migrations /app/migrations
+COPY common /app/common
