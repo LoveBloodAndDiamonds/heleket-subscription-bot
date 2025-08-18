@@ -17,21 +17,34 @@ ssh user@your_server_ip
 ```
 
 ### 2. Установка Docker и Docker Compose
-Установите Docker и Docker Compose (если еще не установлены):
+Обновите систему и установите Docker и Docker Compose этой комбинированной командой (Подходит для ubuntu 22.04):
 ```bash
-sudo apt update
-sudo apt install -y docker.io docker-compose
+sudo apt update &&
+sudo apt upgrade -y &&
+for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done &&
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+&&
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
 ### 3. Клонирование репозитория
-Склонируйте проект с помощью `git clone` или загрузите его через **SFTP**:
-```bash
-git clone https://github.com/your-username/your-repo.git
-```
+Загрузите проект через **SFTP**:
 
 ### 4. Переход в директорию проекта
 ```bash
-cd your-repo
+cd heleket-subscription-bot
 ```
 
 ### 5. Настройка переменных окружения
@@ -41,16 +54,18 @@ cp .env.dist .env
 nano .env
 ```
 
-Укажите токен Telegram-бота, данные БД и ключи платежного провайдера.
+Укажите токен Telegram-бота, данные БД, данные для входа в админ панель и ключи платежного провайдера.
+Порт админки можно поменять на 80.
 
 ### 6. Запуск контейнеров
 Запустите проект в Docker:
 ```bash
-docker-compose up -d --build
+docker-compose up -d
 ```
 
 ## 🔑 Доступ
-После успешного запуска бот будет доступен в Telegram. Пользователь после оплаты получит приглашение в приватный канал или чат.
-
+После успешного запуска бот будет доступен в Telegram.
+Пользователь после оплаты получит приглашение в приватный канал или чат.
+Админ панель будет находится по адресу: http://your_server_ip:80/admin
 ---
 👨‍💻 Автор: *@lovebloodanddiamonds*
